@@ -1,0 +1,10 @@
+/* This file imports Tailwind's styles into the project.
+   In Tailwind v4, this single line replaces the old
+   @tailwind base / components / utilities directives from v3. */
+@import "tailwindcss";
+
+/* You can add small global overrides below this line if needed */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
