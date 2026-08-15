@@ -1,15 +1,17 @@
-// This page shows and lets the employee update their profile info,
-// including uploading a profile picture.
-
 import { useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../services/api";
 
-// Your backend serves uploaded files from /uploads, and your API base URL
-// already ends in /api — we strip that off to build the correct image URL.
 const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
+// Pulled out as its own function to avoid inline regex-in-template-literal
+// parsing issues during build.
+const buildImageUrl = (imagePath) => {
+  const normalizedPath = imagePath.replace(/\\/g, "/");
+  return `${SERVER_URL}/${normalizedPath}`;
+};
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -20,9 +22,7 @@ const Profile = () => {
     position: user?.position || "",
   });
 
-  // Holds the actual file object selected by the user (not yet uploaded)
   const [selectedFile, setSelectedFile] = useState(null);
-  // Holds a temporary local preview URL so the user sees the image before saving
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,12 +30,10 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Runs when the user picks a file in the file input
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Basic client-side check before even trying to upload
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Only JPG, PNG, or WEBP images are allowed");
@@ -47,7 +45,7 @@ const Profile = () => {
     }
 
     setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file)); // creates a temporary local preview
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -55,25 +53,21 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      // FormData is required here (instead of plain JSON) because we're
-      // sending a file — this matches what Multer expects on the backend.
       const data = new FormData();
       data.append("fullName", formData.fullName);
       data.append("department", formData.department);
       data.append("position", formData.position);
       if (selectedFile) {
-        data.append("profileImage", selectedFile); // field name must match upload.single("profileImage")
+        data.append("profileImage", selectedFile);
       }
 
       const response = await api.put("/profile", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Update the global user state so the navbar/sidebar refresh immediately
       updateUser(response.data.user);
       toast.success("Profile updated successfully");
 
-      // Clear the temporary local preview now that the real image is saved
       setSelectedFile(null);
       setPreviewUrl(null);
     } catch (error) {
@@ -87,13 +81,12 @@ const Profile = () => {
   const displayImage = previewUrl
     ? previewUrl
     : user?.profileImage
-    ? `${SERVER_URL}/${user.profileImage.replace(/\\/g, "/")}`
-    : null;
+      ? buildImageUrl(user.profileImage)
+      : null;
 
   return (
     <DashboardLayout title="Profile">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-lg">
-        {/* Profile picture section */}
         <div className="flex items-center gap-4 mb-6">
           {displayImage ? (
             <img
@@ -112,14 +105,21 @@ const Profile = () => {
             <p className="text-sm text-gray-500">{user?.email}</p>
             <label className="mt-1 inline-block text-xs text-purple-800 font-medium cursor-pointer hover:underline">
               Change Photo
-              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </label>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
             <input
               type="text"
               name="fullName"
@@ -129,7 +129,9 @@ const Profile = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department
+            </label>
             <input
               type="text"
               name="department"
@@ -139,7 +141,9 @@ const Profile = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Position
+            </label>
             <input
               type="text"
               name="position"
@@ -149,10 +153,15 @@ const Profile = () => {
             />
           </div>
 
-          {/* Read-only info shown for confirmation after saving */}
           <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 space-y-1">
-            <p><span className="font-medium text-gray-700">Email:</span> {user?.email}</p>
-            <p><span className="font-medium text-gray-700">Role:</span> <span className="capitalize">{user?.role}</span></p>
+            <p>
+              <span className="font-medium text-gray-700">Email:</span>{" "}
+              {user?.email}
+            </p>
+            <p>
+              <span className="font-medium text-gray-700">Role:</span>{" "}
+              <span className="capitalize">{user?.role}</span>
+            </p>
           </div>
 
           <button

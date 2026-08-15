@@ -8,6 +8,14 @@ import adminService from "../../services/adminService";
 
 const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 
+// Pulled out as its own function instead of an inline template literal
+// inside JSX — avoids a build parser issue with regex inside backticks
+// directly in an attribute expression.
+const buildFileUrl = (filePath) => {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  return `${SERVER_URL}/${normalizedPath}`;
+};
+
 const PermissionManagement = () => {
   const [permissions, setPermissions] = useState([]);
   const [filter, setFilter] = useState("Pending");
@@ -93,15 +101,15 @@ const PermissionManagement = () => {
 
                 <p className="text-sm text-gray-600 mb-2">{perm.reason}</p>
 
-                {/* NEW: link to the uploaded supporting document, if one was attached */}
+                {/* Link to the uploaded supporting document, if one was attached */}
                 {perm.medicalFile && (
                   
-                    href={`${SERVER_URL}/${perm.medicalFile.replace(/\\/g, "/")}`}
+                    href={buildFileUrl(perm.medicalFile)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3"
                   >
-                    📎 View Supporting Document
+                    View Supporting Document
                   </a>
                 )}
 
