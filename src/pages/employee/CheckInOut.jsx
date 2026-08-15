@@ -1,6 +1,3 @@
-// This page lets an employee check in and check out for both
-// morning and afternoon sessions.
-
 import { useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -36,10 +33,11 @@ const CheckInOut = () => {
   return (
     <DashboardLayout title="Check In / Check Out">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Morning session card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="font-semibold text-gray-800 mb-1">Morning Session</h2>
-          <p className="text-sm text-gray-500 mb-4">Check-in: 06:00–08:05 • Checkout: 14:00–18:00</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Check-in: 06:00–08:05 • Checkout: from 11:05 onward
+          </p>
           <div className="flex gap-3">
             <button
               onClick={() => handleCheckIn("morning")}
@@ -58,10 +56,14 @@ const CheckInOut = () => {
           </div>
         </div>
 
-        {/* Afternoon session card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="font-semibold text-gray-800 mb-1">Afternoon Session</h2>
-          <p className="text-sm text-gray-500 mb-4">Check-in: 13:00–13:05 • Checkout: from 17:00 onward</p>
+          <h2 className="font-semibold text-gray-800 mb-1">
+            Afternoon Session
+          </h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Check-in: starts 1 hour after your morning checkout • Checkout: from
+            17:00 onward
+          </p>
           <div className="flex gap-3">
             <button
               onClick={() => handleCheckIn("afternoon")}

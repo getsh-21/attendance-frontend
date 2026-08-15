@@ -1,15 +1,18 @@
-// This page lets the admin view all permission requests and approve/reject them.
+// This page lets the admin view all permission requests, approve/reject them,
+// and view any supporting document the employee uploaded.
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import adminService from "../../services/adminService";
 
+const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+
 const PermissionManagement = () => {
   const [permissions, setPermissions] = useState([]);
-  const [filter, setFilter] = useState("Pending"); // default view: only pending requests
+  const [filter, setFilter] = useState("Pending");
   const [loading, setLoading] = useState(true);
-  const [remarksInput, setRemarksInput] = useState({}); // tracks remarks text per request
+  const [remarksInput, setRemarksInput] = useState({});
 
   const fetchPermissions = async (statusFilter) => {
     setLoading(true);
@@ -35,7 +38,7 @@ const PermissionManagement = () => {
         adminRemarks: remarksInput[id] || "",
       });
       toast.success(`Request ${status.toLowerCase()}`);
-      fetchPermissions(filter); // refresh the list
+      fetchPermissions(filter);
     } catch (error) {
       toast.error("Failed to update request");
     }
@@ -44,7 +47,6 @@ const PermissionManagement = () => {
   return (
     <DashboardLayout title="Permission Management">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Filter tabs */}
         <div className="p-4 border-b border-gray-100 flex gap-2">
           {["Pending", "Approved", "Rejected", "All"].map((option) => (
             <button
@@ -89,18 +91,27 @@ const PermissionManagement = () => {
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-3">{perm.reason}</p>
+                <p className="text-sm text-gray-600 mb-2">{perm.reason}</p>
 
-                {/* Only show action buttons for requests still pending */}
+                {/* NEW: link to the uploaded supporting document, if one was attached */}
+                {perm.medicalFile && (
+                  
+                    href={`${SERVER_URL}/${perm.medicalFile.replace(/\\/g, "/")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3"
+                  >
+                    📎 View Supporting Document
+                  </a>
+                )}
+
                 {perm.status === "Pending" && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-2">
                     <input
                       type="text"
                       placeholder="Remarks (optional)"
                       value={remarksInput[perm._id] || ""}
-                      onChange={(e) =>
-                        setRemarksInput({ ...remarksInput, [perm._id]: e.target.value })
-                      }
+                      onChange={(e) => setRemarksInput({ ...remarksInput, [perm._id]: e.target.value })}
                       className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
                     />
                     <button
@@ -118,7 +129,6 @@ const PermissionManagement = () => {
                   </div>
                 )}
 
-                {/* Show existing remarks for already-decided requests */}
                 {perm.status !== "Pending" && perm.adminRemarks && (
                   <p className="text-xs text-gray-400 italic">Remarks: {perm.adminRemarks}</p>
                 )}

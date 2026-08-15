@@ -1,11 +1,37 @@
-// This page lets the admin see everyone's attendance for a given date,
-// including check-in/check-out times in 24-hour format, and export to Excel.
+// This page lets the admin see everyone's attendance for a given date —
+// all 4 events (morning in/out, afternoon in/out) with times and statuses.
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import adminService from "../../services/adminService";
 import { formatTime24 } from "../../utils/formatDate";
+
+const StatusBadge = ({ status }) => {
+  const colors = {
+    "On Time": "text-green-700 bg-green-50",
+    Completed: "text-green-700 bg-green-50",
+    Absent: "text-red-700 bg-red-50",
+    Pending: "text-gray-500 bg-gray-100",
+  };
+  return (
+    <span
+      className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${colors[status] || colors.Pending}`}
+    >
+      {status}
+    </span>
+  );
+};
+
+// Shows one event's time + status stacked compactly
+const EventCell = ({ time, status }) => (
+  <div className="flex flex-col gap-1">
+    <span className="font-mono text-xs font-semibold text-gray-800">
+      {formatTime24(time)}
+    </span>
+    <StatusBadge status={status} />
+  </div>
+);
 
 const AttendanceMonitoring = () => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -33,7 +59,6 @@ const AttendanceMonitoring = () => {
     setExporting(true);
     try {
       const blob = await adminService.exportExcel({ date });
-
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -42,7 +67,6 @@ const AttendanceMonitoring = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-
       toast.success("Excel file downloaded");
     } catch (error) {
       toast.error("Export failed");
@@ -50,33 +74,6 @@ const AttendanceMonitoring = () => {
       setExporting(false);
     }
   };
-
-  const StatusBadge = ({ status }) => {
-    const colors = {
-      "On Time": "text-green-700 bg-green-50",
-      Late: "text-yellow-700 bg-yellow-50",
-      Absent: "text-red-700 bg-red-50",
-      Pending: "text-gray-500 bg-gray-100",
-    };
-    return (
-      <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${colors[status] || colors.Pending}`}>
-        {status}
-      </span>
-    );
-  };
-
-  // Combines check-in and check-out into one compact "HH:MM to HH:MM" string
-  const TimeRange = ({ checkIn, checkOut }) => (
-    <div className="font-mono text-xs whitespace-nowrap flex items-center gap-1.5">
-      <span className={checkIn ? "text-gray-800 font-semibold" : "text-gray-400"}>
-        {formatTime24(checkIn)}
-      </span>
-      <span className="text-gray-400">→</span>
-      <span className={checkOut ? "text-gray-800 font-semibold" : "text-gray-400"}>
-        {formatTime24(checkOut)}
-      </span>
-    </div>
-  );
 
   return (
     <DashboardLayout title="Attendance Monitoring">
@@ -100,18 +97,30 @@ const AttendanceMonitoring = () => {
         {loading ? (
           <p className="p-6 text-gray-500">Loading...</p>
         ) : records.length === 0 ? (
-          <p className="p-6 text-gray-500">No attendance records for this date.</p>
+          <p className="p-6 text-gray-500">
+            No attendance records for this date.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-gray-500">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Employee</th>
-                  <th className="text-left px-4 py-3 font-medium">Department</th>
-                  <th className="text-left px-4 py-3 font-medium">Morning (In→Out)</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 font-medium">Afternoon (In→Out)</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
+                  <th className="text-left px-4 py-3 font-medium">
+                    Department
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium">
+                    Morning In
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium">
+                    Morning Out
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium">
+                    Afternoon In
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium">
+                    Afternoon Out
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -124,16 +133,28 @@ const AttendanceMonitoring = () => {
                       {record.employee?.department || "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <TimeRange checkIn={record.morningCheckIn} checkOut={record.morningCheckOut} />
+                      <EventCell
+                        time={record.morningCheckIn}
+                        status={record.morningCheckInStatus}
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={record.morningStatus} />
+                      <EventCell
+                        time={record.morningCheckOut}
+                        status={record.morningCheckOutStatus}
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <TimeRange checkIn={record.afternoonCheckIn} checkOut={record.afternoonCheckOut} />
+                      <EventCell
+                        time={record.afternoonCheckIn}
+                        status={record.afternoonCheckInStatus}
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={record.afternoonStatus} />
+                      <EventCell
+                        time={record.afternoonCheckOut}
+                        status={record.afternoonCheckOutStatus}
+                      />
                     </td>
                   </tr>
                 ))}

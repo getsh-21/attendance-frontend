@@ -1,6 +1,3 @@
-// This is the employee's home page — shows today's attendance status
-// and quick summary cards.
-
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import employeeService from "../../services/employeeService";
@@ -10,7 +7,6 @@ const EmployeeDashboard = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Runs once when the page loads — fetches recent attendance records
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,24 +21,24 @@ const EmployeeDashboard = () => {
     fetchData();
   }, []);
 
-  // Today's record, if it exists (matches today's date string)
   const today = new Date().toISOString().split("T")[0];
   const todayRecord = history.find((r) => r.date === today);
 
   return (
     <DashboardLayout title="Dashboard">
-      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Morning Status</p>
+          <p className="text-sm text-gray-500 mb-1">Morning Check-In Status</p>
           <p className="text-2xl font-bold text-gray-800">
-            {todayRecord?.morningStatus || "Pending"}
+            {todayRecord?.morningCheckInStatus || "Pending"}
           </p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Afternoon Status</p>
+          <p className="text-sm text-gray-500 mb-1">
+            Afternoon Check-In Status
+          </p>
           <p className="text-2xl font-bold text-gray-800">
-            {todayRecord?.afternoonStatus || "Pending"}
+            {todayRecord?.afternoonCheckInStatus || "Pending"}
           </p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
@@ -51,7 +47,6 @@ const EmployeeDashboard = () => {
         </div>
       </div>
 
-      {/* Recent history table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-800">Recent Attendance</h2>
@@ -74,8 +69,12 @@ const EmployeeDashboard = () => {
               {history.map((record) => (
                 <tr key={record._id} className="border-t border-gray-100">
                   <td className="px-6 py-3 text-gray-700">{record.date}</td>
-                  <td className="px-6 py-3 text-gray-700">{record.morningStatus}</td>
-                  <td className="px-6 py-3 text-gray-700">{record.afternoonStatus}</td>
+                  <td className="px-6 py-3 text-gray-700">
+                    {record.morningCheckInStatus}
+                  </td>
+                  <td className="px-6 py-3 text-gray-700">
+                    {record.afternoonCheckInStatus}
+                  </td>
                 </tr>
               ))}
             </tbody>

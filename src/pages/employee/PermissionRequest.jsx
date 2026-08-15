@@ -1,4 +1,5 @@
-// This page lets an employee submit a leave/permission request.
+// This page lets an employee submit a leave/permission request,
+// with an optional supporting document (e.g. a medical certificate).
 
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -13,20 +14,59 @@ const PermissionRequest = () => {
     startDate: "",
     endDate: "",
   });
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (!selected) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+    if (!allowedTypes.includes(selected.type)) {
+      toast.error("Only JPG, PNG, WEBP, or PDF files are allowed");
+      return;
+    }
+    if (selected.size > 5 * 1024 * 1024) {
+      toast.error("File must be smaller than 5MB");
+      return;
+    }
+    setFile(selected);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await employeeService.requestPermission(formData);
+      const data = new FormData();
+      data.append("position", formData.position);
+      data.append("permissionType", formData.permissionType);
+      data.append("reason", formData.reason);
+      data.append("startDate", formData.startDate);
+      data.append("endDate", formData.endDate);
+      if (file) {
+        data.append("medicalFile", file); // must match uploadPermissionFile.single("medicalFile")
+      }
+
+      await employeeService.requestPermission(data);
       toast.success("Permission request submitted");
-      // Reset the form after a successful submission
-      setFormData({ position: "", permissionType: "Sick Leave", reason: "", startDate: "", endDate: "" });
+      setFormData({
+        position: "",
+        permissionType: "Sick Leave",
+        reason: "",
+        startDate: "",
+        endDate: "",
+      });
+      setFile(null);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit request");
     } finally {
@@ -39,7 +79,9 @@ const PermissionRequest = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Position
+            </label>
             <input
               type="text"
               name="position"
@@ -51,7 +93,9 @@ const PermissionRequest = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Permission Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Permission Type
+            </label>
             <select
               name="permissionType"
               value={formData.permissionType}
@@ -68,7 +112,9 @@ const PermissionRequest = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+              </label>
               <input
                 type="date"
                 name="startDate"
@@ -79,7 +125,9 @@ const PermissionRequest = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
               <input
                 type="date"
                 name="endDate"
@@ -92,7 +140,9 @@ const PermissionRequest = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Reason
+            </label>
             <textarea
               name="reason"
               value={formData.reason}
@@ -101,6 +151,24 @@ const PermissionRequest = () => {
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
             />
+          </div>
+
+          {/* NEW: optional supporting document upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Supporting Document (optional — e.g. medical certificate)
+            </label>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,.pdf"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-purple-50 file:text-purple-800 file:font-medium hover:file:bg-purple-100"
+            />
+            {file && (
+              <p className="text-xs text-gray-500 mt-1">
+                Selected: {file.name}
+              </p>
+            )}
           </div>
 
           <button

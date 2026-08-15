@@ -1,5 +1,3 @@
-// This file wraps all employee-facing API calls in one place.
-
 import api from "./api";
 
 const getProfile = async () => {
@@ -27,9 +25,19 @@ const getNotifications = async () => {
   return response.data;
 };
 
-const requestPermission = async (data) => {
-  const response = await api.post("/permission", data);
+// Now sends FormData since a medical file may be attached
+const requestPermission = async (formData) => {
+  const response = await api.post("/permission", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return response.data;
 };
 
-export default { getProfile, checkIn, checkOut, getHistory, getNotifications, requestPermission };
+export default {
+  getProfile,
+  checkIn,
+  checkOut,
+  getHistory,
+  getNotifications,
+  requestPermission,
+};
