@@ -80,7 +80,7 @@ const PermissionManagement = () => {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-medium text-gray-800">
-                        {perm.employee?.fullName} <span className="text-gray-400 font-normal">— {perm.permissionType}</span>
+                        {perm.employee?.fullName} <span className="text-gray-400 font-normal"> {perm.permissionType}</span>
                       </p>
                       <p className="text-sm text-gray-500">
                         {new Date(perm.startDate).toLocaleDateString()} to {new Date(perm.endDate).toLocaleDateString()}
