@@ -8,14 +8,6 @@ import adminService from "../../services/adminService";
 
 const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 
-// Pulled out as its own function instead of an inline template literal
-// inside JSX — avoids a build parser issue with regex inside backticks
-// directly in an attribute expression.
-const buildFileUrl = (filePath) => {
-  const normalizedPath = filePath.replace(/\\/g, "/");
-  return `${SERVER_URL}/${normalizedPath}`;
-};
-
 const PermissionManagement = () => {
   const [permissions, setPermissions] = useState([]);
   const [filter, setFilter] = useState("Pending");
@@ -75,73 +67,81 @@ const PermissionManagement = () => {
           <p className="p-6 text-gray-500">No {filter.toLowerCase()} requests.</p>
         ) : (
           <div className="divide-y divide-gray-100">
-            {permissions.map((perm) => (
-              <div key={perm._id} className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {perm.employee?.fullName} <span className="text-gray-400 font-normal">— {perm.permissionType}</span>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(perm.startDate).toLocaleDateString()} to {new Date(perm.endDate).toLocaleDateString()}
-                    </p>
+            {permissions.map((perm) => {
+              const hasFile = Boolean(perm.medicalFile);
+              let fileUrl = "";
+              if (hasFile) {
+                const cleanPath = perm.medicalFile.split("\\").join("/");
+                fileUrl = SERVER_URL + "/" + cleanPath;
+              }
+
+              return (
+                <div key={perm._id} className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {perm.employee?.fullName} <span className="text-gray-400 font-normal">— {perm.permissionType}</span>
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(perm.startDate).toLocaleDateString()} to {new Date(perm.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        perm.status === "Approved"
+                          ? "text-green-700 bg-green-50"
+                          : perm.status === "Rejected"
+                          ? "text-red-700 bg-red-50"
+                          : "text-yellow-700 bg-yellow-50"
+                      }`}
+                    >
+                      {perm.status}
+                    </span>
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      perm.status === "Approved"
-                        ? "text-green-700 bg-green-50"
-                        : perm.status === "Rejected"
-                        ? "text-red-700 bg-red-50"
-                        : "text-yellow-700 bg-yellow-50"
-                    }`}
-                  >
-                    {perm.status}
-                  </span>
+
+                  <p className="text-sm text-gray-600 mb-2">{perm.reason}</p>
+
+                  {hasFile && (
+                    
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3"
+                    >
+                      View Supporting Document
+                    </a>
+                  )}
+
+                  {perm.status === "Pending" && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <input
+                        type="text"
+                        placeholder="Remarks (optional)"
+                        value={remarksInput[perm._id] || ""}
+                        onChange={(e) => setRemarksInput({ ...remarksInput, [perm._id]: e.target.value })}
+                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      />
+                      <button
+                        onClick={() => handleDecision(perm._id, "Approved")}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleDecision(perm._id, "Rejected")}
+                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+
+                  {perm.status !== "Pending" && perm.adminRemarks && (
+                    <p className="text-xs text-gray-400 italic">Remarks: {perm.adminRemarks}</p>
+                  )}
                 </div>
-
-                <p className="text-sm text-gray-600 mb-2">{perm.reason}</p>
-
-                {/* Link to the uploaded supporting document, if one was attached */}
-                {perm.medicalFile && (
-                  
-                    href={buildFileUrl(perm.medicalFile)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3"
-                  >
-                    View Supporting Document
-                  </a>
-                )}
-
-                {perm.status === "Pending" && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <input
-                      type="text"
-                      placeholder="Remarks (optional)"
-                      value={remarksInput[perm._id] || ""}
-                      onChange={(e) => setRemarksInput({ ...remarksInput, [perm._id]: e.target.value })}
-                      className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-                    />
-                    <button
-                      onClick={() => handleDecision(perm._id, "Approved")}
-                      className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleDecision(perm._id, "Rejected")}
-                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
-
-                {perm.status !== "Pending" && perm.adminRemarks && (
-                  <p className="text-xs text-gray-400 italic">Remarks: {perm.adminRemarks}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
