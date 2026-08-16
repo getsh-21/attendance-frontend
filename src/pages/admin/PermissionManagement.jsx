@@ -1,6 +1,3 @@
-// This page lets the admin view all permission requests, approve/reject them,
-// and view any supporting document the employee uploaded.
-
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -75,12 +72,17 @@ const PermissionManagement = () => {
                 fileUrl = SERVER_URL + "/" + cleanPath;
               }
 
+              let fileLink = null;
+              if (hasFile) {
+                fileLink = <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3">View Supporting Document</a>;
+              }
+
               return (
                 <div key={perm._id} className="p-5">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-medium text-gray-800">
-                        {perm.employee?.fullName} <span className="text-gray-400 font-normal"> {perm.permissionType}</span>
+                        {perm.employee?.fullName} <span className="text-gray-400 font-normal">- {perm.permissionType}</span>
                       </p>
                       <p className="text-sm text-gray-500">
                         {new Date(perm.startDate).toLocaleDateString()} to {new Date(perm.endDate).toLocaleDateString()}
@@ -101,16 +103,7 @@ const PermissionManagement = () => {
 
                   <p className="text-sm text-gray-600 mb-2">{perm.reason}</p>
 
-                  {hasFile && (
-                    
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block text-xs text-purple-800 font-medium hover:underline mb-3"
-                    >
-                      View Supporting Document
-                    </a>
-                  )}
+                  {fileLink}
 
                   {perm.status === "Pending" && (
                     <div className="flex items-center gap-2 mt-2">
