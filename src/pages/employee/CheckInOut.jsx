@@ -32,14 +32,14 @@ const CheckInOut = () => {
 
   return (
     <DashboardLayout title="Check In / Check Out">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
           <h2 className="font-semibold text-gray-800 mb-1">Morning Session</h2>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">
             On Time: 06:00-08:05 - Late: 08:06-09:00 - Checkout: from 11:05
             onward
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => handleCheckIn("morning")}
               disabled={loadingAction === "checkin-morning"}
@@ -57,15 +57,15 @@ const CheckInOut = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
           <h2 className="font-semibold text-gray-800 mb-1">
             Afternoon Session
           </h2>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-xs sm:text-sm text-gray-500 mb-4">
             Check-in: starts 1 hour after your morning checkout - Checkout: from
             17:00 onward
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => handleCheckIn("afternoon")}
               disabled={loadingAction === "checkin-afternoon"}

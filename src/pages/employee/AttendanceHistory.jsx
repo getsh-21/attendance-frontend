@@ -1,7 +1,5 @@
-// This page shows the employee's full attendance history, with the actual
-// check-in/check-out TIME (24-hour format, EAT) alongside the status for
-// all four events: morning check-in, morning check-out, afternoon check-in,
-// afternoon check-out.
+// This page shows the employee's full attendance history. On desktop it's
+// a table; on mobile, each record becomes a stacked card for readability.
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -48,7 +46,6 @@ const AttendanceHistory = () => {
     );
   };
 
-  // Shows one event's time (24hr, EAT) stacked above its own status badge
   const SessionCell = ({ time, status }) => (
     <div className="flex flex-col gap-1">
       <span
@@ -60,15 +57,89 @@ const AttendanceHistory = () => {
     </div>
   );
 
+  const Pagination = () => (
+    <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-gray-100">
+      <button
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+        disabled={page === 1}
+        className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 disabled:opacity-40"
+      >
+        Previous
+      </button>
+      <span className="text-sm text-gray-500">
+        Page {page} of {totalPages}
+      </span>
+      <button
+        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+        disabled={page === totalPages}
+        className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
+  );
+
   return (
     <DashboardLayout title="Attendance History">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading ? (
-          <p className="p-6 text-gray-500">Loading...</p>
-        ) : records.length === 0 ? (
-          <p className="p-6 text-gray-500">No records found.</p>
-        ) : (
-          <>
+      {loading ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      ) : records.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <p className="text-gray-500">No records found.</p>
+        </div>
+      ) : (
+        <>
+          {/* MOBILE: stacked cards, one per day (hidden on desktop) */}
+          <div className="space-y-3 md:hidden">
+            {records.map((record) => (
+              <div
+                key={record._id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
+              >
+                <p className="text-sm font-semibold text-gray-800 mb-3">
+                  {record.date}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Morning In</p>
+                    <SessionCell
+                      time={record.morningCheckIn}
+                      status={record.morningCheckInStatus}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Morning Out</p>
+                    <SessionCell
+                      time={record.morningCheckOut}
+                      status={record.morningCheckOutStatus}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Afternoon In</p>
+                    <SessionCell
+                      time={record.afternoonCheckIn}
+                      status={record.afternoonCheckInStatus}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Afternoon Out</p>
+                    <SessionCell
+                      time={record.afternoonCheckOut}
+                      status={record.afternoonCheckOutStatus}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <Pagination />
+            </div>
+          </div>
+
+          {/* DESKTOP: normal table (hidden on mobile) */}
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500">
@@ -123,29 +194,10 @@ const AttendanceHistory = () => {
                 </tbody>
               </table>
             </div>
-
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 disabled:opacity-40"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-500">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+            <Pagination />
+          </div>
+        </>
+      )}
     </DashboardLayout>
   );
 };

@@ -1,6 +1,3 @@
-// This is the employee's home page — shows today's attendance status
-// and a preview of recent records, each with real check-in/out times.
-
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import employeeService from "../../services/employeeService";
@@ -58,35 +55,43 @@ const EmployeeDashboard = () => {
 
   return (
     <DashboardLayout title="Dashboard">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Morning Check-In</p>
-          <p className="text-xl font-bold text-gray-800">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500 mb-1">
+            Morning Check-In
+          </p>
+          <p className="text-lg sm:text-xl font-bold text-gray-800">
             {todayRecord?.morningCheckInStatus || "Pending"}
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Morning Check-Out</p>
-          <p className="text-xl font-bold text-gray-800">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500 mb-1">
+            Morning Check-Out
+          </p>
+          <p className="text-lg sm:text-xl font-bold text-gray-800">
             {todayRecord?.morningCheckOutStatus || "Pending"}
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Afternoon Check-In</p>
-          <p className="text-xl font-bold text-gray-800">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500 mb-1">
+            Afternoon Check-In
+          </p>
+          <p className="text-lg sm:text-xl font-bold text-gray-800">
             {todayRecord?.afternoonCheckInStatus || "Pending"}
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Afternoon Check-Out</p>
-          <p className="text-xl font-bold text-gray-800">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
+          <p className="text-xs sm:text-sm text-gray-500 mb-1">
+            Afternoon Check-Out
+          </p>
+          <p className="text-lg sm:text-xl font-bold text-gray-800">
             {todayRecord?.afternoonCheckOutStatus || "Pending"}
           </p>
         </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-800">Recent Attendance</h2>
         </div>
 
@@ -95,60 +100,106 @@ const EmployeeDashboard = () => {
         ) : history.length === 0 ? (
           <p className="p-6 text-gray-500">No attendance records yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-500">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">Date</th>
-                  <th className="text-left px-4 py-3 font-medium">
-                    Morning In
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium">
-                    Morning Out
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium">
-                    Afternoon In
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium">
-                    Afternoon Out
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((record) => (
-                  <tr key={record._id} className="border-t border-gray-100">
-                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap align-top">
-                      {record.date}
-                    </td>
-                    <td className="px-4 py-3 align-top">
+          <>
+            {/* MOBILE: stacked cards */}
+            <div className="md:hidden divide-y divide-gray-100">
+              {history.map((record) => (
+                <div key={record._id} className="p-4">
+                  <p className="text-sm font-semibold text-gray-800 mb-3">
+                    {record.date}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Morning In</p>
                       <SessionCell
                         time={record.morningCheckIn}
                         status={record.morningCheckInStatus}
                       />
-                    </td>
-                    <td className="px-4 py-3 align-top">
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Morning Out</p>
                       <SessionCell
                         time={record.morningCheckOut}
                         status={record.morningCheckOutStatus}
                       />
-                    </td>
-                    <td className="px-4 py-3 align-top">
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Afternoon In</p>
                       <SessionCell
                         time={record.afternoonCheckIn}
                         status={record.afternoonCheckInStatus}
                       />
-                    </td>
-                    <td className="px-4 py-3 align-top">
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">
+                        Afternoon Out
+                      </p>
                       <SessionCell
                         time={record.afternoonCheckOut}
                         status={record.afternoonCheckOutStatus}
                       />
-                    </td>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* DESKTOP: table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-gray-500">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium">Date</th>
+                    <th className="text-left px-4 py-3 font-medium">
+                      Morning In
+                    </th>
+                    <th className="text-left px-4 py-3 font-medium">
+                      Morning Out
+                    </th>
+                    <th className="text-left px-4 py-3 font-medium">
+                      Afternoon In
+                    </th>
+                    <th className="text-left px-4 py-3 font-medium">
+                      Afternoon Out
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {history.map((record) => (
+                    <tr key={record._id} className="border-t border-gray-100">
+                      <td className="px-4 py-3 text-gray-700 whitespace-nowrap align-top">
+                        {record.date}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <SessionCell
+                          time={record.morningCheckIn}
+                          status={record.morningCheckInStatus}
+                        />
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <SessionCell
+                          time={record.morningCheckOut}
+                          status={record.morningCheckOutStatus}
+                        />
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <SessionCell
+                          time={record.afternoonCheckIn}
+                          status={record.afternoonCheckInStatus}
+                        />
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <SessionCell
+                          time={record.afternoonCheckOut}
+                          status={record.afternoonCheckOutStatus}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>
