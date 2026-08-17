@@ -36,7 +36,8 @@ const CheckInOut = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="font-semibold text-gray-800 mb-1">Morning Session</h2>
           <p className="text-sm text-gray-500 mb-4">
-            Check-in: 06:00–08:05 • Checkout: from 11:05 onward
+            On Time: 06:00-08:05 - Late: 08:06-09:00 - Checkout: from 11:05
+            onward
           </p>
           <div className="flex gap-3">
             <button
@@ -61,7 +62,7 @@ const CheckInOut = () => {
             Afternoon Session
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            Check-in: starts 1 hour after your morning checkout • Checkout: from
+            Check-in: starts 1 hour after your morning checkout - Checkout: from
             17:00 onward
           </p>
           <div className="flex gap-3">
