@@ -1,5 +1,6 @@
-// This page lets an employee submit a leave/permission request,
-// with an optional supporting document (e.g. a medical certificate).
+// This page lets an employee submit a leave/permission request with a
+// specific date AND time range (used to detect which session - morning
+// or afternoon - the permission actually covers), plus an optional file.
 
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -12,7 +13,9 @@ const PermissionRequest = () => {
     permissionType: "Sick Leave",
     reason: "",
     startDate: "",
+    startTime: "06:00:00",
     endDate: "",
+    endTime: "17:00:00",
   });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -47,14 +50,20 @@ const PermissionRequest = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Combine date + time with a fixed "+03:00" (EAT) offset, so the
+      // submitted time always means East Africa Time regardless of the
+      // browser's own local timezone.
+      const startDateTime = `${formData.startDate}T${formData.startTime}+03:00`;
+      const endDateTime = `${formData.endDate}T${formData.endTime}+03:00`;
+
       const data = new FormData();
       data.append("position", formData.position);
       data.append("permissionType", formData.permissionType);
       data.append("reason", formData.reason);
-      data.append("startDate", formData.startDate);
-      data.append("endDate", formData.endDate);
+      data.append("startDate", startDateTime);
+      data.append("endDate", endDateTime);
       if (file) {
-        data.append("medicalFile", file); // must match uploadPermissionFile.single("medicalFile")
+        data.append("medicalFile", file);
       }
 
       await employeeService.requestPermission(data);
@@ -64,7 +73,9 @@ const PermissionRequest = () => {
         permissionType: "Sick Leave",
         reason: "",
         startDate: "",
+        startTime: "06:00:00",
         endDate: "",
+        endTime: "17:00:00",
       });
       setFile(null);
     } catch (error) {
@@ -76,7 +87,7 @@ const PermissionRequest = () => {
 
   return (
     <DashboardLayout title="Permission Request">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-xl">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 max-w-xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -126,12 +137,43 @@ const PermissionRequest = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Start Time
+              </label>
+              <input
+                type="time"
+                name="startTime"
+                step="1"
+                value={formData.startTime}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 End Date
               </label>
               <input
                 type="date"
                 name="endDate"
                 value={formData.endDate}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Time
+              </label>
+              <input
+                type="time"
+                name="endTime"
+                step="1"
+                value={formData.endTime}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
@@ -153,10 +195,9 @@ const PermissionRequest = () => {
             />
           </div>
 
-          {/* NEW: optional supporting document upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Supporting Document (optional — e.g. medical certificate)
+              Supporting Document (optional - e.g. medical certificate)
             </label>
             <input
               type="file"

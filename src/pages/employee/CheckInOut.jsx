@@ -62,8 +62,8 @@ const CheckInOut = () => {
             Afternoon Session
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mb-4">
-            Check-in: starts 1 hour after your morning checkout - Checkout: from
-            17:00 onward
+            On Time: within 1h05m of your morning checkout - Late: up to 2h30m -
+            Checkout: from 17:00 onward
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <button

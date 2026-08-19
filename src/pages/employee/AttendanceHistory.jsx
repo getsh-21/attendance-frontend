@@ -1,5 +1,6 @@
-// This page shows the employee's full attendance history. On desktop it's
-// a table; on mobile, each record becomes a stacked card for readability.
+// This page shows the employee's full attendance history, with the actual
+// check-in/check-out TIME (24-hour format, EAT) alongside the status for
+// all four events. Desktop: table. Mobile: stacked cards.
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -36,6 +37,9 @@ const AttendanceHistory = () => {
       Absent: "text-red-700 bg-red-50",
       Completed: "text-blue-700 bg-blue-50",
       Pending: "text-gray-500 bg-gray-100",
+      "Permission Allowed": "text-teal-700 bg-teal-50",
+      "Permission Denied": "text-red-700 bg-red-50",
+      "Permission Pending": "text-orange-700 bg-orange-50",
     };
     return (
       <span

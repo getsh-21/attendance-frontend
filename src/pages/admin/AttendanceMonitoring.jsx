@@ -1,5 +1,5 @@
 // This page shows the admin all 4 check-in/check-out events per employee.
-// Desktop: table. Mobile: stacked cards per employee.
+// Desktop: table. Mobile: stacked cards.
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -56,6 +56,9 @@ const AttendanceMonitoring = () => {
       Absent: "text-red-700 bg-red-50",
       Pending: "text-gray-500 bg-gray-100",
       Completed: "text-blue-700 bg-blue-50",
+      "Permission Allowed": "text-teal-700 bg-teal-50",
+      "Permission Denied": "text-red-700 bg-red-50",
+      "Permission Pending": "text-orange-700 bg-orange-50",
     };
     return (
       <span

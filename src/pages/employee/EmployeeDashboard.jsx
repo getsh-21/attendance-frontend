@@ -1,3 +1,7 @@
+// This is the employee's home page — shows today's attendance status
+// and a preview of recent records, each with real check-in/out times.
+// Desktop: table. Mobile: stacked cards.
+
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import employeeService from "../../services/employeeService";
@@ -32,6 +36,9 @@ const EmployeeDashboard = () => {
       Absent: "text-red-700 bg-red-50",
       Completed: "text-blue-700 bg-blue-50",
       Pending: "text-gray-500 bg-gray-100",
+      "Permission Allowed": "text-teal-700 bg-teal-50",
+      "Permission Denied": "text-red-700 bg-red-50",
+      "Permission Pending": "text-orange-700 bg-orange-50",
     };
     return (
       <span
